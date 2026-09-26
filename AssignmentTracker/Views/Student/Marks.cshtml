@@ -1,0 +1,51 @@
+@model List<Submission>
+@{
+    ViewData["Title"] = "Marks & Remarks";
+}
+
+<h4 class="mb-3">My Marks &amp; Remarks</h4>
+
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th>Assignment</th>
+                        <th>Subject</th>
+                        <th>Submitted On</th>
+                        <th>Status</th>
+                        <th>Marks</th>
+                        <th>Remarks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr><td colspan="6" class="text-center text-muted py-4">You haven't submitted any assignments yet.</td></tr>
+                    }
+                    @foreach (var s in Model)
+                    {
+                        <tr>
+                            <td>@s.Assignment?.Title</td>
+                            <td>@s.Assignment?.Subject</td>
+                            <td>@s.SubmissionDate.ToString("dd MMM yyyy HH:mm")</td>
+                            <td>
+                                @if (s.IsLate)
+                                {
+                                    <span class="badge badge-late">Late</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-ontime">On Time</span>
+                                }
+                            </td>
+                            <td>@(s.Marks?.ToString() ?? "Not graded yet")</td>
+                            <td>@(string.IsNullOrEmpty(s.Remarks) ? "-" : s.Remarks)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

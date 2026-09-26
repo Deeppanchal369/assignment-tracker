@@ -1,0 +1,55 @@
+@model AssignmentFormViewModel
+@{
+    ViewData["Title"] = "Edit Assignment";
+}
+
+<h4 class="mb-3">Edit Assignment</h4>
+
+<div class="card">
+    <div class="card-body">
+        <form asp-controller="Teacher" asp-action="EditAssignment" asp-route-id="@Model.AssignmentId" method="post" enctype="multipart/form-data" novalidate>
+            <input type="hidden" asp-for="AssignmentId" />
+            <div asp-validation-summary="ModelOnly" class="text-danger small mb-2"></div>
+
+            <div class="mb-3">
+                <label asp-for="Title" class="form-label">Title</label>
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Subject" class="form-label">Subject</label>
+                <input asp-for="Subject" class="form-control" />
+                <span asp-validation-for="Subject" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Description" class="form-label">Description</label>
+                <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                <span asp-validation-for="Description" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="DueDate" class="form-label">Due Date</label>
+                <input asp-for="DueDate" type="date" class="form-control" />
+                <span asp-validation-for="DueDate" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Replace File (optional, PDF/DOC/DOCX — max 20 MB)</label>
+                <input asp-for="File" type="file" id="assignmentFile" data-max-size-check class="form-control" accept=".pdf,.doc,.docx" />
+                <div id="assignmentFile-feedback" class="text-danger small d-none">File exceeds the 20 MB limit.</div>
+                <span asp-validation-for="File" class="text-danger small"></span>
+                @if (!string.IsNullOrEmpty(Model.ExistingFilePath))
+                {
+                    <div class="form-text">
+                        Current file: <a href="@Model.ExistingFilePath" target="_blank">@System.IO.Path.GetFileName(Model.ExistingFilePath)</a>
+                    </div>
+                }
+            </div>
+
+            <button type="submit" class="btn btn-primary"><i class="bi bi-save me-1"></i>Save Changes</button>
+            <a asp-controller="Teacher" asp-action="Assignments" class="btn btn-outline-secondary">Cancel</a>
+        </form>
+    </div>
+</div>

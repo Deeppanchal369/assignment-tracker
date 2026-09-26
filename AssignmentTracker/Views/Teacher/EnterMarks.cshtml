@@ -1,0 +1,50 @@
+@model Submission
+@{
+    ViewData["Title"] = "Enter Marks";
+}
+
+<h4 class="mb-3">Enter Marks &amp; Remarks</h4>
+
+<div class="card">
+    <div class="card-body">
+        <dl class="row mb-4">
+            <dt class="col-sm-3">Student</dt>
+            <dd class="col-sm-9">@Model.Student?.Name (@Model.Student?.Email)</dd>
+
+            <dt class="col-sm-3">Submitted On</dt>
+            <dd class="col-sm-9">
+                @Model.SubmissionDate.ToString("dd MMM yyyy HH:mm")
+                @if (Model.IsLate)
+                {
+                    <span class="badge badge-late ms-2">Late</span>
+                }
+                else
+                {
+                    <span class="badge badge-ontime ms-2">On Time</span>
+                }
+            </dd>
+
+            <dt class="col-sm-3">Submitted File</dt>
+            <dd class="col-sm-9">
+                <a asp-controller="Teacher" asp-action="DownloadSubmission" asp-route-id="@Model.SubmissionId" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-download me-1"></i>Download Submission
+                </a>
+            </dd>
+        </dl>
+
+        <div asp-validation-summary="ModelOnly" class="text-danger small mb-2"></div>
+
+        <form asp-controller="Teacher" asp-action="EnterMarks" asp-route-id="@Model.SubmissionId" method="post">
+            <div class="mb-3">
+                <label class="form-label">Marks (out of 100)</label>
+                <input type="number" name="marks" min="0" max="100" class="form-control" value="@Model.Marks" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Remarks</label>
+                <textarea name="remarks" class="form-control" rows="3">@Model.Remarks</textarea>
+            </div>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-save me-1"></i>Save</button>
+            <a asp-controller="Teacher" asp-action="ViewSubmissions" asp-route-id="@Model.AssignmentId" class="btn btn-outline-secondary">Cancel</a>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,74 @@
+@model Assignment
+@{
+    ViewData["Title"] = "Submit Assignment";
+    var existing = ViewBag.ExistingSubmission as Submission;
+    var pastDue = DateTime.Today > Model.DueDate;
+}
+
+<h4 class="mb-3">Submit: @Model.Title</h4>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-3">Subject</dt>
+            <dd class="col-sm-9">@Model.Subject</dd>
+            <dt class="col-sm-3">Description</dt>
+            <dd class="col-sm-9">@Model.Description</dd>
+            <dt class="col-sm-3">Due Date</dt>
+            <dd class="col-sm-9">
+                @Model.DueDate.ToString("dd MMM yyyy")
+                @if (pastDue)
+                {
+                    <span class="badge badge-late ms-2">Deadline Passed</span>
+                }
+            </dd>
+            <dt class="col-sm-3">Assignment File</dt>
+            <dd class="col-sm-9">
+                <a asp-controller="Student" asp-action="DownloadAssignmentFile" asp-route-id="@Model.AssignmentId" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-download me-1"></i>Download
+                </a>
+            </dd>
+        </dl>
+    </div>
+</div>
+
+@if (existing != null)
+{
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle me-1"></i>
+        You already submitted this assignment on @existing.SubmissionDate.ToString("dd MMM yyyy HH:mm").
+        @if (!pastDue)
+        {
+            <text> You can replace it below before the deadline.</text>
+        }
+        else
+        {
+            <text> The deadline has passed, so it can no longer be replaced.</text>
+        }
+    </div>
+}
+
+<div class="card">
+    <div class="card-body">
+        <div asp-validation-summary="ModelOnly" class="text-danger small mb-2"></div>
+
+        @if (existing == null || !pastDue)
+        {
+            <form asp-controller="Student" asp-action="Submit" asp-route-id="@Model.AssignmentId" method="post" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label class="form-label">Choose file (PDF, DOC, DOCX — max 20 MB)</label>
+                    <input type="file" name="file" id="submissionFile" data-max-size-check class="form-control" accept=".pdf,.doc,.docx" />
+                    <div id="submissionFile-feedback" class="text-danger small d-none">File exceeds the 20 MB limit.</div>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-upload me-1"></i>@(existing == null ? "Submit" : "Replace Submission")
+                </button>
+                <a asp-controller="Student" asp-action="Assignments" class="btn btn-outline-secondary">Cancel</a>
+            </form>
+        }
+        else
+        {
+            <a asp-controller="Student" asp-action="Assignments" class="btn btn-outline-secondary">Back to Assignments</a>
+        }
+    </div>
+</div>

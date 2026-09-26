@@ -1,0 +1,43 @@
+@model List<Submission>
+@{
+    ViewData["Title"] = "Late Submissions";
+}
+
+<h4 class="mb-3">Late Submissions</h4>
+
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th>Assignment</th>
+                        <th>Student</th>
+                        <th>Due Date</th>
+                        <th>Submitted On</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr><td colspan="5" class="text-center text-muted py-4">No late submissions. Great job by your class!</td></tr>
+                    }
+                    @foreach (var s in Model)
+                    {
+                        <tr>
+                            <td>@s.Assignment?.Title</td>
+                            <td>@s.Student?.Name</td>
+                            <td>@s.Assignment?.DueDate.ToString("dd MMM yyyy")</td>
+                            <td>@s.SubmissionDate.ToString("dd MMM yyyy HH:mm")</td>
+                            <td class="text-end">
+                                <a asp-controller="Teacher" asp-action="DownloadSubmission" asp-route-id="@s.SubmissionId" class="btn btn-sm btn-outline-primary" title="Download"><i class="bi bi-download"></i></a>
+                                <a asp-controller="Teacher" asp-action="EnterMarks" asp-route-id="@s.SubmissionId" class="btn btn-sm btn-outline-warning" title="Enter Marks"><i class="bi bi-pencil-square"></i></a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

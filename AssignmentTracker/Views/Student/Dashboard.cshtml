@@ -1,0 +1,112 @@
+@model StudentDashboardViewModel
+@{
+    ViewData["Title"] = "Student Dashboard";
+}
+
+<h3 class="mb-4">Welcome back, @Context.Session.GetString("UserName")</h3>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3 col-sm-6">
+        <div class="card stat-card bg-blue">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="small text-white-50">Total Assignments</div>
+                    <div class="fs-3 fw-bold">@Model.TotalAssignments</div>
+                </div>
+                <i class="bi bi-journal-text stat-icon"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="card stat-card bg-teal">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="small text-white-50">Submitted</div>
+                    <div class="fs-3 fw-bold">@Model.SubmittedCount</div>
+                </div>
+                <i class="bi bi-check-circle stat-icon"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="card stat-card bg-orange">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="small text-white-50">Pending</div>
+                    <div class="fs-3 fw-bold">@Model.PendingCount</div>
+                </div>
+                <i class="bi bi-hourglass-split stat-icon"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="card stat-card bg-red">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="small text-white-50">Average Marks</div>
+                    <div class="fs-3 fw-bold">@(Model.AverageMarks.HasValue ? Model.AverageMarks.Value.ToString("0.0") : "-")</div>
+                </div>
+                <i class="bi bi-award stat-icon"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (Model.UpcomingAssignment != null)
+{
+    <div class="alert alert-warning d-flex align-items-center">
+        <i class="bi bi-alarm me-2 fs-5"></i>
+        <div>
+            Upcoming deadline: <strong>@Model.UpcomingAssignment.Title</strong> is due on
+            <strong>@Model.UpcomingAssignment.DueDate.ToString("dd MMM yyyy")</strong>.
+        </div>
+    </div>
+}
+
+<div class="card">
+    <div class="card-header">Assignment Status</div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Subject</th>
+                        <th>Due Date</th>
+                        <th>Status</th>
+                        <th>Marks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Rows.Any())
+                    {
+                        <tr><td colspan="5" class="text-center text-muted py-4">No assignments yet.</td></tr>
+                    }
+                    @foreach (var row in Model.Rows)
+                    {
+                        <tr>
+                            <td>@row.Assignment.Title</td>
+                            <td>@row.Assignment.Subject</td>
+                            <td>@row.Assignment.DueDate.ToString("dd MMM yyyy")</td>
+                            <td>
+                                @if (row.Submission == null)
+                                {
+                                    <span class="badge bg-secondary">Not Submitted</span>
+                                }
+                                else if (row.Submission.IsLate)
+                                {
+                                    <span class="badge badge-late">Submitted Late</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-ontime">Submitted</span>
+                                }
+                            </td>
+                            <td>@(row.Submission?.Marks?.ToString() ?? "-")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

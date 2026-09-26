@@ -1,0 +1,64 @@
+@model Assignment
+@{
+    ViewData["Title"] = "Submissions";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Submissions for "@Model.Title"</h4>
+    <a asp-controller="Teacher" asp-action="Assignments" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i>Back to List
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        Due: @Model.DueDate.ToString("dd MMM yyyy") &middot; Total submissions: @Model.Submissions.Count
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Email</th>
+                        <th>Submitted On</th>
+                        <th>Status</th>
+                        <th>Marks</th>
+                        <th>Remarks</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Submissions.Any())
+                    {
+                        <tr><td colspan="7" class="text-center text-muted py-4">No submissions yet.</td></tr>
+                    }
+                    @foreach (var s in Model.Submissions.OrderByDescending(x => x.SubmissionDate))
+                    {
+                        <tr>
+                            <td>@s.Student?.Name</td>
+                            <td>@s.Student?.Email</td>
+                            <td>@s.SubmissionDate.ToString("dd MMM yyyy HH:mm")</td>
+                            <td>
+                                @if (s.IsLate)
+                                {
+                                    <span class="badge badge-late">Late</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-ontime">On Time</span>
+                                }
+                            </td>
+                            <td>@(s.Marks?.ToString() ?? "-")</td>
+                            <td>@(string.IsNullOrEmpty(s.Remarks) ? "-" : s.Remarks)</td>
+                            <td class="text-end">
+                                <a asp-controller="Teacher" asp-action="DownloadSubmission" asp-route-id="@s.SubmissionId" class="btn btn-sm btn-outline-primary" title="Download"><i class="bi bi-download"></i></a>
+                                <a asp-controller="Teacher" asp-action="EnterMarks" asp-route-id="@s.SubmissionId" class="btn btn-sm btn-outline-warning" title="Enter Marks"><i class="bi bi-pencil-square"></i></a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
