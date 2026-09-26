@@ -1,6 +1,6 @@
 # Assignment Submission Tracker
 
-A comprehensive web-based assignment management system built with **ASP.NET Core MVC** (.NET 8) designed for educational institutions to streamline the assignment submission and evaluation process. Teachers create and grade assignments; students submit work and track marks. Authentication is session-based (no ASP.NET Core Identity), and the whole app is plain MVC — controllers talk to `ApplicationDbContext` directly (no repository pattern, no CQRS, no MediatR).
+A comprehensive web-based assignment management system built with **ASP.NET Core 8.0 Razor Pages** designed for educational institutions to streamline the assignment submission and evaluation process. Teachers create and grade assignments; students submit work and track marks. Authentication is session-based (no ASP.NET Core Identity), with a lightweight architecture that keeps controllers simple and focused on business logic.
 
 ## Overview
 
@@ -28,282 +28,419 @@ Assignment Tracker is a role-based application that facilitates seamless communi
 - **Responsive Design**: Mobile-friendly interface for seamless access across devices.
 - **Data Integrity**: Unique constraints ensure one submission per student per assignment.
 
-## Tech Stack
-- **Framework**: ASP.NET Core MVC, .NET 8, C#
-- **Database**: SQL Server with Entity Framework Core (Code First) + SQL Server / LocalDB
-- **Frontend**: Razor Views + Bootstrap 5 + Bootstrap Icons
-- **Session Management**: Distributed Memory Cache
-- **Language**: C#
-- **ORM**: Code-First approach with migrations
+## Technology Stack
 
-## Project Folder Tree
+| Component | Technology |
+|-----------|-----------|
+| **Framework** | ASP.NET Core 8.0 (Razor Pages) |
+| **Language** | C# |
+| **Database** | SQL Server with Entity Framework Core 8.0.8 |
+| **ORM Pattern** | Code-First approach with migrations |
+| **Frontend** | Razor Pages + Bootstrap 5 + Bootstrap Icons |
+| **Session Management** | Distributed Memory Cache |
+| **Architecture Pattern** | Lightweight MVC (Controllers + Views/Razor Pages) |
 
-```
-AssignmentTracker/                        <- solution folder
+## Project Structure
+
+AssignmentTracker/                           <- Solution folder
 ├── AssignmentTracker.sln
 ├── README.md
 ├── .gitignore
-├── Database/
-│   └── CreateTables.sql                  <- manual SQL Server script (optional path)
-└── AssignmentTracker/                    <- the MVC project
+└── AssignmentTracker/                       <- Main Razor Pages Project
     ├── AssignmentTracker.csproj
-    ├── Program.cs
-    ├── appsettings.json
-    ├── appsettings.Development.json
+    ├── Program.cs                           <- Application configuration & startup
+    ├── appsettings.json                     <- Base configuration (no secrets)
+    ├── appsettings.Development.json         <- Development-specific settings
+    │
     ├── Controllers/
-    │   ├── HomeController.cs
-    │   ├── AccountController.cs
-    │   ├── TeacherController.cs
-    │   └── StudentController.cs
+    │   ├── AccountController.cs             <- Authentication (Login/Logout)
+    │   ├── TeacherController.cs             <- Teacher assignment management
+    │   ├── StudentController.cs             <- Student submission management
+    │   └── HomeController.cs                <- Home page controller
+    │
     ├── Filters/
-    │   └── SessionAuthorizeAttribute.cs
+    │   └── SessionAuthorizeAttribute.cs     <- Custom authorization filter
+    │
     ├── Models/
-    │   ├── Teacher.cs
-    │   ├── Student.cs
-    │   ├── Assignment.cs
-    │   ├── Submission.cs
+    │   ├── Teacher.cs                       <- Teacher entity
+    │   ├── Student.cs                       <- Student entity
+    │   ├── Assignment.cs                    <- Assignment entity
+    │   ├── Submission.cs                    <- Submission entity
+    │   ├── PasswordHelper.cs                <- Password hashing utility
     │   └── ViewModels/
     │       ├── LoginViewModel.cs
     │       ├── TeacherDashboardViewModel.cs
     │       ├── StudentDashboardViewModel.cs
     │       └── AssignmentFormViewModel.cs
+    │
     ├── Data/
-    │   ├── ApplicationDbContext.cs
-    │   ├── DbInitializer.cs
-    │   └── PasswordHelper.cs
+    │   ├── ApplicationDbContext.cs          <- EF Core database context
+    │   └── DbInitializer.cs                 <- Seed data configuration
+    │
     ├── Views/
-    │   ├── _ViewImports.cshtml
-    │   ├── _ViewStart.cshtml
+    │   ├── _ViewImports.cshtml              <- Shared namespaces & tag helpers
+    │   ├── _ViewStart.cshtml                <- Default layout setup
     │   ├── Shared/
-    │   │   ├── _Layout.cshtml
-    │   │   └── Error.cshtml
-    │   ├── Account/Login.cshtml
+    │   │   ├── _Layout.cshtml               <- Master layout template
+    │   │   ├── _NavBar.cshtml               <- Navigation bar partial
+    │   │   └── Error.cshtml                 <- Error page
+    │   ├── Account/
+    │   │   └── Login.cshtml                 <- Login form
     │   ├── Teacher/
-    │   │   ├── Dashboard.cshtml
-    │   │   ├── Assignments.cshtml
-    │   │   ├── CreateAssignment.cshtml
-    │   │   ├── EditAssignment.cshtml
-    │   │   ├── ViewAssignment.cshtml
-    │   │   ├── ViewSubmissions.cshtml
-    │   │   ├── EnterMarks.cshtml
-    │   │   └── LateSubmissions.cshtml
+    │   │   ├── Dashboard.cshtml             <- Teacher dashboard
+    │   │   ├── CreateAssignment.cshtml      <- Create new assignment form
+    │   │   ├── EditAssignment.cshtml        <- Edit existing assignment
+    │   │   ├── ViewAssignments.cshtml       <- List all assignments
+    │   │   ├── ViewSubmissions.cshtml       <- View student submissions
+    │   │   ├── EnterMarks.cshtml            <- Grade submission form
+    │   │   └── LateSubmissions.cshtml       <- View late submissions
     │   └── Student/
-    │       ├── Dashboard.cshtml
-    │       ├── Assignments.cshtml
-    │       ├── Submit.cshtml
-    │       └── Marks.cshtml
+    │       ├── Dashboard.cshtml             <- Student dashboard
+    │       ├── Assignments.cshtml           <- View available assignments
+    │       ├── Submit.cshtml                <- Submit assignment form
+    │       └── Marks.cshtml                 <- View grades & feedback
+    │
     └── wwwroot/
-        ├── css/site.css
-        ├── js/site.js
+        ├── css/
+        │   └── site.css                     <- Custom styles
+        ├── js/
+        │   └── site.js                      <- Custom scripts
         └── uploads/
-            ├── assignments/  (seeded demo files + real uploads land here)
-            └── submissions/  (seeded demo file + real uploads land here)
-```
+            ├── assignments/                 <- Uploaded assignment documents
+            └── submissions/                 <- Student submission files
 
-## Database Diagram (ERD)
+## Database Schema (Entity-Relationship Diagram)
 
-```
- Teachers                     Assignments                    Submissions                 Students
- ---------                    -----------                    -----------                 --------
- TeacherId (PK)  ───────┐     AssignmentId (PK)   ┐           SubmissionId (PK)           StudentId (PK) ───┐
- Name                   │     Title                │           AssignmentId (FK) ─────────┘                │
- Email (unique)         └───► TeacherId (FK)        │           StudentId (FK) ─────────────────────────────┘
- Password                     Description           │           SubmissionDate
-                               Subject               │           FilePath
-                               UploadDate            │           IsLate
-                               DueDate               │           Marks
-                               FilePath              │           Remarks
-                               └── 1-to-many ────────┘
-                               (one Teacher has many Assignments;
-                                one Assignment has many Submissions;
-                                one Student has many Submissions;
-                                a Student can submit an Assignment only once —
-                                unique index on (AssignmentId, StudentId))
-```
+ Teachers                    Assignments                Submissions              Students
+ --------                    -----------                -----------              --------
+ TeacherId (PK) ─────┐       AssignmentId (PK)    ┐     SubmissionId (PK)       StudentId (PK)
+ Name                 │       Title                │     AssignmentId (FK) ─┐    Name
+ Email (unique)       └────►  TeacherId (FK)       │     StudentId (FK) ──┐ │    Email (unique)
+ Password                     Description          │     SubmissionDate   │ │    Password
+                              Subject               │     FilePath         │ │    Course
+                              UploadDate            │     IsLate           │ │    Semester
+                              DueDate               │     Marks            │ │
+                              FilePath              │     Remarks          │ │
+                              └── 1-to-many ────────┘     └────────────────┼─┘
+                                                          Unique: (AssignmentId, StudentId)
+                                                          (Prevents duplicate submissions)
 
-## Demo Logins (seeded automatically on first run)
+### Entity Relationships
+- **One Teacher** → **Many Assignments** (1:N)
+- **One Assignment** → **Many Submissions** (1:N)
+- **One Student** → **Many Submissions** (1:N)
+- **Unique Constraint**: Each student can submit to an assignment only once
 
-| Role    | Email                 | Password     |
-|---------|------------------------|--------------|
-| Teacher | teacher@college.edu    | Teacher@123  |
-| Student | rahul@college.edu      | Student@123  |
-| Student | priya@college.edu      | Student@123  |
-| Student | aman@college.edu       | Student@123  |
+## Demo Login Credentials (Seeded on First Run)
 
-## Run Instructions (Visual Studio 2022)
-
-1. **Prerequisites**: Visual Studio 2022 (17.8+) with the "ASP.NET and web development" workload, .NET 8 SDK, and SQL Server LocalDB (installed by default with Visual Studio) or a full SQL Server instance.
-2. Open `AssignmentTracker.sln` in Visual Studio 2022.
-3. Restore NuGet packages (Visual Studio does this automatically on open, or right-click the solution → **Restore NuGet Packages**).
-4. Check the connection string in `appsettings.json` — the default `(localdb)\mssqllocaldb` works out of the box with LocalDB. Change it if you want to point at a different SQL Server instance.
-5. Open the **Package Manager Console** (Tools → NuGet Package Manager → Package Manager Console) with `AssignmentTracker` selected as the default project, and create the initial migration:
-   ```
-   Add-Migration InitialCreate
-   Update-Database
-   ```
-   (Equivalently, from a terminal in the `AssignmentTracker` project folder:
-   `dotnet ef migrations add InitialCreate` then `dotnet ef database update`.
-   If `dotnet-ef` isn't installed: `dotnet tool install --global dotnet-ef`.)
-6. Press **F5** (or **Ctrl+F5**) to run. `Program.cs` calls `context.Database.Migrate()` on startup, which applies the migration, and `DbInitializer.Seed()` inserts the demo teacher/students/assignments the first time the database is empty.
-7. You'll land on the login page. Log in with any of the demo credentials above, or as a teacher to create your own assignments.
-
-   Alternatively, you can skip EF migrations entirely and run `Database/CreateTables.sql` directly against SQL Server / LocalDB in SQL Server Management Studio or Azure Data Studio — the app will detect the existing schema and just seed data through `DbInitializer` on first run (skip step 5 in that case, but keep the connection string pointed at that database).
+| Role | Email | Password |
+|------|-------|----------|
+| Teacher | `teacher@college.edu` | `Teacher@123` |
+| Student | `rahul@college.edu` | `Student@123` |
+| Student | `priya@college.edu` | `Student@123` |
+| Student | `aman@college.edu` | `Student@123` |
 
 ## Getting Started
 
 ### Prerequisites
 
-- .NET 8 SDK or later
-- SQL Server 2019 or later (Express edition supported)
-- Visual Studio 2022 or Visual Studio Code
-- Git
+- **.NET 8 SDK** or later ([download](https://dotnet.microsoft.com/download/dotnet/8.0))
+- **Visual Studio 2022** (17.8+) with "ASP.NET and web development" workload
+- **SQL Server** 2019+ (LocalDB, Express, or full edition)
+- **Git** for version control
 
-### Installation
+### Installation & Setup
+
+#### Option 1: Visual Studio 2022 (Recommended)
 
 1. **Clone the repository**
-   ```
    git clone https://github.com/yourusername/AssignmentTracker.git
    cd AssignmentTracker
-   ```
 
-2. **Configure the database connection**
+2. **Open the solution**
+- Open `AssignmentTracker.sln` in Visual Studio 2022
+- NuGet packages will restore automatically
 
-Update the connection string in `appsettings.json`:
-   ```json
+3. **Configure database connection** (if needed)
+- Open `appsettings.json`
+- Default connection string uses LocalDB: `(localdb)\mssqllocaldb`
+- Update if using a different SQL Server instance:
    {
      "ConnectionStrings": {
        "DefaultConnection": "Server=YOUR_SERVER;Database=AssignmentTrackerDB;Trusted_Connection=true;TrustServerCertificate=true;"
      }
    }
 
-3. **Restore NuGet packages**
-   ```
-   dotnet restore
-   ```
-
-4. **Apply database migrations**
-   ```
-   dotnet ef database update
-   ```
+4. **Create database & apply migrations**
+- Open **Package Manager Console** (Tools → NuGet Package Manager → Package Manager Console)
+- Ensure `AssignmentTracker` is selected as the default project
+- Run:
+   Add-Migration InitialCreate
+   Update-Database
 
 5. **Run the application**
-   ```
-   dotnet run
-   ```
+- Press **F5** (Debug) or **Ctrl+F5** (Release)
+- Application opens in your default browser at `https://localhost:5001`
+- Login page appears automatically
+- `DbInitializer.Seed()` runs automatically on first startup and populates demo data
 
-The application will be available at `https://localhost:5001` (or the configured port).
+#### Option 2: Command Line (.NET CLI)
 
-## Usage
+# Clone the repository
+git clone https://github.com/yourusername/AssignmentTracker.git
+cd AssignmentTracker/AssignmentTracker
 
-### First-Time Login
+# Restore packages
+dotnet restore
 
-The application comes with sample seed data:
+# Create & apply migrations
+dotnet ef migrations add InitialCreate
+dotnet ef database update
 
-**Teacher Account**
-- Email: `teacher@college.edu`
-- Password: `Teacher@123`
+# Run the application
+dotnet run
+# Application runs on http://localhost:5000 or https://localhost:5001
 
-**Student Accounts**
-- Email: `rahul@college.edu` | Password: `Student@123`
-- Email: `priya@college.edu` | Password: `Student@123`
-- Email: `aman@college.edu` | Password: `Student@123`
+#### Option 3: SQL Script (Manual Schema)
+
+If you prefer to create the database manually:
+
+1. Open **SQL Server Management Studio** or **Azure Data Studio**
+2. Execute the SQL script (if provided in `Database/CreateTables.sql`)
+3. Update connection string in `appsettings.json` to point to your database
+4. Run the application — it will detect the schema and seed demo data automatically
+
+## Usage Guide
 
 ### Teacher Workflow
 
-1. Log in with teacher credentials
-2. Navigate to "Create Assignment"
-3. Fill in assignment details and upload document
-4. View submissions from students
-5. Review and grade submissions with marks and feedback
+1. **Log in** with teacher credentials (`teacher@college.edu` / `Teacher@123`)
+2. **View Dashboard** — Overview of all assignments and submissions
+3. **Create Assignment**
+   - Click "Create Assignment"
+   - Enter title, description, subject, due date
+   - Upload assignment document
+   - Click "Save"
+4. **View Submissions** — See all student submissions for each assignment
+5. **Grade Submissions**
+   - Click "Enter Marks"
+   - Enter marks and feedback/remarks
+   - Click "Save"
+6. **Track Late Submissions** — View assignments submitted after due date
 
 ### Student Workflow
 
-1. Log in with student credentials
-2. View all available and past assignments
-3. Download assignment document for reference
-4. Submit solution file before the due date
-5. Check submitted status and grades from teachers
+1. **Log in** with student credentials (e.g., `rahul@college.edu` / `Student@123`)
+2. **View Dashboard** — See all available and past assignments
+3. **Download Assignment** — Click download icon to view assignment document
+4. **Submit Assignment**
+   - Click "Submit" for the assignment
+   - Select the solution file
+   - Click "Upload & Submit"
+5. **Check Status** — View submission date and marks from teacher
+6. **View Marks** — See grades and feedback in the "My Marks" section
 
 ## Configuration
 
 ### Session Settings
 
-Session timeout is configured to 60 minutes by default. Modify in `Program.cs`:
+Session timeout is configured to **60 minutes** by default. To modify:
 
-```csharp
+**File**: `Program.cs`
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(60);
+    options.IdleTimeout = TimeSpan.FromMinutes(60);  // Change this value
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
+    options.Cookie.Name = "AssignmentTracker.Session";
 });
-```
 
-### File Upload Paths
+### File Upload Configuration
 
-Default upload directories:
-- Assignments: `wwwroot/uploads/assignments/`
-- Submissions: `wwwroot/uploads/submissions/`
+Default upload directories are created during migration:
+- **Assignments**: `wwwroot/uploads/assignments/`
+- **Submissions**: `wwwroot/uploads/submissions/`
 
-Ensure these directories have appropriate read/write permissions.
+Ensure these directories exist and have read/write permissions:
+# Create directories if missing
+mkdir wwwroot/uploads/assignments
+mkdir wwwroot/uploads/submissions
+
+### Logging Configuration
+
+Modify log levels in `appsettings.json`:
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft": "Warning",
+      "Microsoft.EntityFrameworkCore": "Debug"
+    }
+  }
+}
 
 ## Security Features
 
-- **Password Hashing**: User passwords are hashed using secure algorithms.
-- **Session Management**: Automatic session timeout after inactivity.
-- **HttpOnly Cookies**: Prevents client-side script access to session cookies.
+- **Password Hashing**: User passwords are hashed using secure algorithms before storage.
+- **Session-Based Authentication**: Custom session management without ASP.NET Core Identity.
+- **HttpOnly Cookies**: Prevents client-side JavaScript access to session cookies.
 - **Unique Constraints**: Prevents duplicate submissions per assignment.
-- **Role-Based Access**: Pages are restricted based on user role (Teacher/Student).
+- **Role-Based Access**: Pages restricted based on user role (Teacher/Student).
+- **Authorize Filters**: Custom `[SessionAuthorize]` attribute validates user sessions.
+- **File Upload Validation**: Files are stored outside web root for security.
 
 ## Database Migrations
 
-To create a new migration after model changes:
+### Create a New Migration
 
-```
+After modifying entity models:
+
 dotnet ef migrations add MigrationName
 dotnet ef database update
-```
+
+### View Migration History
+
+dotnet ef migrations list
+
+### Revert Migration
+
+dotnet ef database update PreviousMigrationName
+
+### Reset Database (Development Only)
+
+dotnet ef database drop
+dotnet ef database update
+
+## Project Build & Run
+
+### Build the Project
+
+dotnet build
+
+### Run the Application
+
+dotnet run
+
+### Run in Release Mode
+
+dotnet run --configuration Release
+
+### Publish for Deployment
+
+dotnet publish -c Release -o ./publish
 
 ## Troubleshooting
 
-### Connection String Issues
-- Verify SQL Server is running and accessible.
-- Check firewall settings if connecting to a remote database.
-- Ensure TrustServerCertificate is set to true for local development.
+### Issue: Connection String Error
+**Error**: `A network-related or instance-specific error occurred while establishing a connection`
 
-### File Upload Errors
-- Verify upload directories exist in `wwwroot/uploads/`.
-- Check file permissions for read/write access.
-- Ensure sufficient disk space.
+**Solutions**:
+- Verify SQL Server is running: `sqlcmd -S (localdb)\mssqllocaldb -U sa`
+- Check connection string in `appsettings.json`
+- Use SQL Server Management Studio to verify database exists
+- Try connection with different credentials or server name
 
-### Session Timeout
-- Clear browser cookies if experiencing unexpected logouts.
-- Increase timeout value in `Program.cs` if needed.
+### Issue: Migration Failed
+**Error**: `Failed to generate a SQL migration`
+
+**Solutions**:
+- Delete the `Migrations` folder and start fresh.
+- Ensure models are valid and compile without errors.
+- Run: `dotnet ef migrations add InitialCreate --force`.
+
+### Issue: File Upload Not Working
+**Error**: `The system cannot find the specified path`
+
+**Solutions**:
+- Verify directories exist: `wwwroot/uploads/assignments/` and `wwwroot/uploads/submissions/`.
+- Check folder permissions (should allow read/write).
+- Verify file size limits are appropriate in `Program.cs`.
+
+### Issue: Session Timeout Unexpectedly
+**Error**: User logged out after short inactivity
+
+**Solutions**:
+- Increase timeout in `Program.cs` (default: 60 minutes).
+- Clear browser cookies and cache.
+- Check if browser has "Clear cookies on exit" enabled.
+
+### Issue: Demo Data Not Appearing
+**Error**: Login fails with demo credentials
+
+**Solutions**:
+- Verify `DbInitializer.Seed()` was called on startup.
+- Check database has `Teachers` and `Students` tables.
+- Review Application logs for seed errors.
+- Try deleting database and re-running migrations.
+
+## Development
+
+### Project Standards
+
+- **Language Version**: C# Latest (11+)
+- **Nullable Reference Types**: Disabled (`<Nullable>disable</Nullable>`)
+- **Implicit Usings**: Enabled
+- **Code Style**: Follows Microsoft C# conventions
+
+### Dependencies
+
+| Package | Version | Purpose |
+|---------|---------|---------|
+| `Microsoft.EntityFrameworkCore.SqlServer` | 8.0.8 | SQL Server database provider |
+| `Microsoft.EntityFrameworkCore.Tools` | 8.0.8 | EF Core CLI commands |
+| `Microsoft.EntityFrameworkCore.Design` | 8.0.8 | Design-time services |
+
+### IDE Recommendations
+
+- **Visual Studio 2022** (latest)
+- **VS Code** with C# Dev Kit extension
+- **Rider** by JetBrains
 
 ## Future Enhancements
 
-- Email notifications for assignment deadlines and submissions.
-- Assignment rubrics with detailed evaluation criteria.
-- Bulk submission download functionality.
-- Advanced filtering and search capabilities.
-- Assignment plagiarism detection.
-- Mobile application (iOS/Android).
-- Real-time notifications using SignalR.
+- [ ] Email notifications for assignment deadlines and submissions
+- [ ] Assignment rubrics with detailed evaluation criteria
+- [ ] Bulk submission download functionality
+- [ ] Advanced filtering and search capabilities
+- [ ] Assignment plagiarism detection integration
+- [ ] Real-time notifications using SignalR
+- [ ] Mobile application (iOS/Android)
+- [ ] Analytics dashboard with charts
+- [ ] Automated backup system
+- [ ] Two-factor authentication (2FA)
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
 
-## Contact & Support
+## Contributing
 
-For issues, questions, or suggestions, please create an issue in the repository or contact the development team.
+Contributions are welcome! Please follow these guidelines:
 
-## Contributors
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/YourFeature`)
+3. Commit your changes (`git commit -m 'Add YourFeature'`)
+4. Push to the branch (`git push origin feature/YourFeature`)
+5. Open a Pull Request
 
-- Development Team
-- Educational Institution Partners
+## Support & Contact
+
+For issues, questions, or suggestions:
+- **Create an Issue** on GitHub
+- **Contact**: development team
+- **Email**: support@assignmenttracker.local
+
+## Changelog
+
+### Version 1.0.0 (Current)
+- Initial release with core features
+- Teacher assignment management
+- Student submission system
+- Session-based authentication
+- Grading and feedback system
 
 ---
 
 **Last Updated**: September 2026  
-**Version**: 1.0.0
+**Maintainers**: Development Team  
+**Status**: Active Development
